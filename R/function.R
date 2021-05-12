@@ -250,13 +250,15 @@ calEF_bin <- function(data, fn, nbin=NULL){
 
   }
   if((curnonSRG>=(length(nonSRGList)*.1) & curSRG>=(length(SRGList)*.01)) |
-  (curSRG>=(length(SRGList)*.1) & curnonSRG>=(length(nonSRGList)*.01))){
-  #if((curnonSRG>=(length(nonSRGList)*.05) & curSRG>=(length(SRGList)*.01)) |
-  # (curSRG>=(length(SRGList)*.05) & curnonSRG>=(length(nonSRGList)*.01))){
+  (curSRG>=(length(SRGList)*.1) & curnonSRG>=(length(nonSRGList)*.01)) |
+  nrow(new_evFc)==0){
+  #if((curnonSRG>=(length(nonSRGList)*.05) & curSRG>=(length(SRGList)*.01) & curSRG > 2) |
+  # (curSRG>=(length(SRGList)*.05) & curSRG > 2 & (curnonSRG>=(length(nonSRGList)*.01)|curnonSRG>=100)) |
+  #  nrow(new_evFc)==0){
     start <- curStart
     end <- curEnd
-    ## if the last bin has no sleep,
-    ##  replace non sleep gene count to 1, to prevent output of inf
+    ## if the last bin has only sleep genes,
+    ##  replace non-sleep gene count to 1, to prevent output of inf
     if(curnonSRG == 0){
       nonSRG_Y = 1
     }else{

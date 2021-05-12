@@ -8,8 +8,8 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.ensemble import RandomForestClassifier
 
-PATH = "/Users/leegs9/workDIR/sleep/ML_model/fix1000Unlabeled/"
-DATE = "20210206"
+PATH = "/Users/leegs9/workDIR/sleep/ML_model/"
+DATE = "20210512"
 runJI = False
 
 if runJI == True:

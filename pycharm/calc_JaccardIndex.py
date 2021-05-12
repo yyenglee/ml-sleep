@@ -171,9 +171,9 @@ def process_input(geneSetList, geneList, geneDict, SRG_list, DATAPATH, curwkPATH
         fn = info[1]
         dataType = info[2]
         print("Calculating JI for %s" % rName)
-        if dataType == 'geneJI':
+        if dataType == 'geneJI':    # use gene level JI as features
             geneList = process_database_gene(rName, fn, geneDict, geneList, SRG_list, DATAPATH, curwkPATH)
-        elif dataType == 'termJI':
+        elif dataType == 'termJI': # use term level JI as feature, only work if each term is a gene (e.g. protein-protein interactions)
             geneList = process_database_term(rName, fn, geneDict, geneList, SRG_list, DATAPATH, curwkPATH)
         if inserttodataframe and len(geneOrder) > 0:
             infoList = converttoVector(geneList, geneOrder)
@@ -183,7 +183,7 @@ def process_input(geneSetList, geneList, geneDict, SRG_list, DATAPATH, curwkPATH
         return dataset
 
 ### actual code to insert JI score from database to the dataset
-def main(dataset, curwkPATH, geneSetList, SUFFIX, readlabelsFromInput, DATAPATH="D:/Storage/Lab/sleep/sleep_gene/workDIR/feature_selection_batch/DATA/"):
+def main(dataset, curwkPATH, geneSetList, SUFFIX, readlabelsFromInput, DATAPATH="./DATA/"):
     geneDict = SRGfn.createHumanGeneAliasDict()
 
     if not os.path.exists(curwkPATH + "Database_JI"):
