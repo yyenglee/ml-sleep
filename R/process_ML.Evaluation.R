@@ -10,8 +10,6 @@ library(magrittr)
 library(RColorBrewer)
 library(cowplot)
 library(ROCR)
-source(paste0(pdir,"function.R"))
-source(paste0(pdir,"configure.R"))
 options(stringsAsFactors = FALSE)
 
 folderName <- "./"
@@ -88,7 +86,6 @@ p1 <- ggplot(rdEnsemblML) +
          color = guide_legend(override.aes = list(size = 3)))
 p1
 ggsave(paste0(folderName,"SRG_randomlabel_bayesPC.pdf"), p1, width=7, height=7, useDingbats=FALSE)
-#ggsave(paste0(folderName,"SRG_randomlabel_",curDate,".pdf"), p1, width=14, height=5, useDingbats=FALSE)
 
 ## make precision-recall plot
 curDate <- "sss_20210506"

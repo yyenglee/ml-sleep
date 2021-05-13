@@ -1,9 +1,5 @@
 ## Script to calculate evidence factors given a list of data metrics
 
-pdir = "E:/Lab/sleep/sleep_gene/workDIR/feature_selection_batch/"
-setwd("E:/Lab/sleep/sleep_gene/workDIR/feature_selection_batch/")
-curPath <- "./"
-
 library(ggplot2)
 library(ggridges)
 library(dplyr)
@@ -13,19 +9,30 @@ library(magrittr)
 library(ggrepel)
 library(ggpubr)
 library(cowplot)
-source(paste0(curPath,"function.R"))
-source(paste0(curPath,"configure.R"))
+source("./R/function.R")
 options(stringsAsFactors = FALSE)
 
-#sleepGeneList_all <- createSleepGeneList(sleepGeneFile=sGene)
-#inputsleepGeneList <-sleepGeneList_all$hGene
-inputsleepGene <- read.table(paste0(curPath,"inputSleepGeneList.txt"), header=FALSE, sep="\t") %>%
+pdir = "./"
+setwd("./") # working director
+curPath <- "./OUT/" # directory to write output file
+curDate <- '20210503' ## working date, use to create unique identity for output
+
+geneAliasDict <- list("mouse" = "./REFERENCE/Mus_musculus.gene_info.gz",
+                      "drosophila" = "./REFERENCE/Drosophila_melanogaster.gene_info.gz",
+                      "human" = "./REFERENCE/Homo_sapiens.gene_info.gz")
+
+taxid <- list("mouse"= "10090", 
+              "drosophila" ="7227",
+              "human"="9606")
+    
+## read gene used as labels    
+inputsleepGene <- read.table("./DATA/inputSleepGeneList.txt", header=FALSE, sep="\t") %>%
   magrittr::set_colnames(c("GeneSymbol", "Tier"))
 inputsleepGeneList <- inputsleepGene$GeneSymbol
 minInputSleepGeneCuttoff <- length(inputsleepGeneList)*.25
 
 ## Read the list of gene for evaluation
-geneListBlank <- read.table(paste0(pdir,"GeneList.txt"),sep="\t", quote="", header=T)
+geneListBlank <- read.table("./DATA/GeneList.txt",sep="\t", quote="", header=T)
 geneListBlank <- labelData(geneListBlank, sleepGeneList = inputsleepGeneList)
 
 ## Create empty data based on the set of all known gene
@@ -33,11 +40,7 @@ rawValuetable <- geneListBlank
 EFtable <- geneListBlank
 
 ## Calculate evidence factor for each data metrics
-curDate <- '20210503' ## working date, use to create unique identity for output
-curPath <- "./bin_correctSleepGeneList/"
-
 PATH <- read.table("combine_fList_updateGeneList.txt",header=F) %>%
-#PATH <- read.table("testPath.txt",header=F) %>%
   magrittr::set_colnames(c("Source", "ID","Input","Models","DataType")) %>%
   dplyr::mutate(rID=gsub("-",".",ID)) %>%
   dplyr::select(-ID) %>%
@@ -46,18 +49,15 @@ PATH <- read.table("combine_fList_updateGeneList.txt",header=F) %>%
   dplyr::mutate(EFscore=NA)
 
 ## read existing table with data metrics raw value
-#rawValuetable <- read.csv(paste0("./bin_newFullGeneList/fList_rawValuetable_",curDate,".csv"), header=T) %>%
 rawValuetable <- read.csv(paste0("./fList_rawValuetable.csv"), header=T) %>%
   dplyr::select(-label)
 rawValuetable <- labelData(rawValuetable, sleepGeneList=inputsleepGeneList)
 
 ## Add new data metrics to rawValuetable
-newDate <- '20210126'
 rawValuetable <- addRawValue(PATH, rawValuetable, inputsleepGeneList)
-write.csv(rawValuetable, paste0("./fList_rawValuetable_",newDate,".csv"), row.names=FALSE)
+write.csv(rawValuetable, "./fList_rawValuetable.csv", row.names=FALSE)
 
-pdf(paste0(curPath,"EFbin_selectedFeature_",curDate,".pdf"),8,3)
-#pdf("testpath.pdf",8,3)
+pdf(paste0(curPath,"EFbin_",curDate,".pdf"),8,3)
 p <- list()
 for(i in 3:ncol(rawValuetable)){
   ID <- colnames(rawValuetable)[i]
@@ -103,24 +103,28 @@ write.table(PATH, paste0(curPath, "fList_PATH_",curDate,".txt"),sep="\t", row.na
 write.csv(EFtable, paste0(curPath, "fList_EFtable_",curDate,".csv"), row.names=FALSE)
 
 ## select feature with high evidence
-zz <- apply(EFtable[,3:ncol(EFtable)],2,function(x){sort(na.omit(x),decreasing = TRUE)[1]})
-#zz <- apply(a[,3:ncol(a)], 2, function(x){z=x[complete.cases(x)]; mean(z[z>=quantile(z, .9)])})
-yy <- zz[zz>=3]
-head(yy[order(yy, decreasing = TRUE)], 20)
-write.table(as.data.frame(cbind(names(yy), as.numeric(yy))), file="EFg3.txt", row.names=FALSE)
+zz <- data.frame(ID=character(),
+                 maxEF=numeric(),
+                 stringsAsFactors=FALSE)
+for(i in 3:ncol(EFtable)){
+  ID <- colnames(EFtable)[i]
+  maxEF <- max(EFtable[,i],na.rm=TRUE)
+  zz <- rbind(zz, data.frame(ID, maxEF))
+}
 
-za <-data.frame(zz[zz>1]) %>%
-  magrittr::set_colnames(c("evidence_factors"))
+yy <- zz %>%
+  dplyr::arrange(desc(maxEF)) %>%
+  dplyr::filter(maxEF>=3)
+head(yy, 20)
 
-p1 <- ggplot(za, aes(x=evidence_factors)) + 
+p1 <- ggplot(zz, aes(x=maxEF)) + 
   geom_histogram(bins=500, fill="darkblue", alpha=0.8) +
   #geom_density() +
   xlab("maxEF") +
   geom_vline(xintercept = 3, linetype="dashed", color="#777777") + 
   scale_x_continuous(trans='log2') +
   theme_bw()
-p1
-ggsave(p1, filename = paste0("./bin_correctSleepGeneList/EF_distribution",curDate,".pdf"),width = 2.5, height = 2)
+ggsave(p1, filename = paste0(curPath,"EF_distribution",curDate,".pdf"),width = 2.5, height = 2)
 
 cleanRawValuetable <- rawValuetable %>%
   dplyr::select(c("GeneSymbol","label",c(names(yy)))) %>%
@@ -134,6 +138,7 @@ cleanEFtable <- EFtable %>%
   dplyr::filter(naCount<length(yy)* .5) %>%
   dplyr::select(-naCount)
 
+## calculate pairwise correlation for selected samples wiht high evidence factors
 corTable <- as.data.frame(cor(cleanRawValuetable[,3:ncol(cleanRawValuetable)], use="pairwise.complete.obs"))
 
 corTable$ID <- 1:(length(yy))
