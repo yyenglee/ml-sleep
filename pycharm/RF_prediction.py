@@ -8,19 +8,20 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.ensemble import RandomForestClassifier
 
-PATH = "/Users/leegs9/workDIR/sleep/ML_model/"
+PATH = "~/OUT/"
 DATE = "20210512"
-runJI = False
+INPUT_TABLE = "./DATA/fList_cleanRawValue_20201229.csv"
+runJI = False    ## Do you want to add in features from jaccard index?
 
 if runJI == True:
-    inData = pd.read_csv("D:\Storage\Lab\sleep\sleep_gene\workDIR\\feature_selection_batch\\bin_newFullGeneList\\fList_cleanRawValue_20201229.csv")
+    inData = pd.read_csv(INPUT_TABLE)
     dataset = calcJI.main(dataset = inData,
                           curwkPATH = PATH,
-                geneSetList = "D:/Storage/Lab/sleep/sleep_gene/workDIR/feature_selection_batch/DATA/rawdata/Database/geneset.list",
-                SUFFIX = DATE,
-                readlabelsFromInput = True)
+                          geneSetList = "./DATA/gmt_file/geneset.list",
+                          SUFFIX = DATE,
+                          DATAPATH="./DATA/")
 else:
-    dataset = pd.read_csv("~/workDIR/sleep/fList_cleanRawValue_withJI_20201229.csv")
+    dataset = pd.read_csv(INPUT_TABLE)
 
 labeldata = dataset.copy()
 print("Input dimensions: (rows, columns)", labeldata.shape)
@@ -38,13 +39,11 @@ labelencoder_y = LabelEncoder()
 y = labelencoder_y.fit_transform(y)
 y_rename = abs(1-y)  # label sleep gene as 1 and non sleep gene as 0
 
-# scale features
-#X = StandardScaler().fit_transform(X)
 
 ## Create correlation table between sleep genes
 testRatio = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
 sleepGeneList = list(dataset["GeneSymbol"][y==0])
-weight = (100/labeldata[labeldata["label"] == "SRG"].shape[0]) * 10
+weight = (10000/labeldata[labeldata["label"] == "SRG"].shape[0])
 all_indices = list(range(X.shape[0]))
 feature_list = dataset.columns[2:]
 seed_value = 18

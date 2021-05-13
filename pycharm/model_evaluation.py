@@ -29,7 +29,11 @@ def fit_NNmodel(X_train, y_train, n_cols, weight):
     NNmodel.fit(X_train, y_train, validation_split=0.2, class_weight={0: 1, 1: weight}, epochs=100,	batch_size=int(len(y_train) / 5), verbose=0)
     return NNmodel
 
-dataset = pd.read_csv("D:\Storage\Lab\sleep\sleep_gene\workDIR\\feature_selection_batch\\bin_newFullGeneList\\fList_cleanRawValue_withJI_20201229.csv")
+## Parameter
+PATH = "~/OUT/"
+INPUT_TABLE = "~/fList_cleanRawValue_withJI_20201229.csv"
+dataset = pd.read_csv(INPUT_TABLE)
+DATE = "20210512"
 
 labeldata = dataset.copy()
 print(labeldata.shape)
@@ -53,7 +57,7 @@ X = StandardScaler().fit_transform(X)
 testRatio = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
 nStep = 20
 
-weight = (100/labeldata[labeldata["label"] == "SRG"].shape[0]) * 100
+weight = 10000/labeldata[labeldata["label"] == "SRG"].shape[0]
 namesCLF = ["LogisticRegression", "NaiveBayes", "DecisionTree", "LinearSVM", "RandomForest", "AdaptiveBoosting"]
 classifiers = [
     LogisticRegression(class_weight={0: 1, 1: weight}, max_iter=1000),
@@ -152,10 +156,10 @@ for i in range(predScore.shape[1]):
     predScore.iloc[:,i] = predScore.iloc[:,i]/predCount.iloc[:,i]
 
 rawMatrix = pd.DataFrame(rawMatrix)
-rawMatrix.to_csv("D:\Storage\Lab\sleep\sleep_gene\workDIR\\feature_selection_batch\\bin_newFullGeneList\\ensembleML_matrixSleepGene_rawValue_sss_20201229.csv")
+rawMatrix.to_csv(PATH + "ensembleML_matrixSleepGene_rawValue_sss_" + DATE + ".csv")
 
 predScore.insert(0, "GeneSymbol", list(dataset["GeneSymbol"]), True)
-predScore.to_csv("D:\Storage\Lab\sleep\sleep_gene\workDIR\\feature_selection_batch\\bin_newFullGeneList\\predScore_sss_20201229.csv")
+predScore.to_csv(PATH + "predScore_sss_" + DATE + ".csv")
 
 ## run algorithm using random label gene
 # generate data with random label
@@ -243,4 +247,4 @@ for nn in range(nRandomLabelSet):
             tf.keras.backend.clear_session()
 
 rawMatrix_random = pd.DataFrame(rawMatrix_random)
-rawMatrix_random.to_csv("D:\Storage\Lab\sleep\sleep_gene\workDIR\\feature_selection_batch\\bin_newFullGeneList\\ensembleML_matrixRandomLabel_rawValue_sss_20201228.csv")
+rawMatrix_random.to_csv(PATH + "ensembleML_matrixRandomLabel_rawValue_sss_" + DATE + ".csv")

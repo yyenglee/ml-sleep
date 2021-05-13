@@ -16,7 +16,7 @@ class Gene:
 
 # Create dictionary to map all gene alias to official gene name
 def createHumanGeneAliasDict():
-    humanREF = 'D:/Storage/Lab/sleep/sleep_gene/workDIR/feature_selection_batch/REFERENCE/Homo_sapiens.gene_info.gz'
+    humanREF = './REFERENCE/Homo_sapiens.gene_info.gz'
     geneDict = {}
     with gzip.open(humanREF, "rb") as f:
         next(f)
@@ -36,9 +36,3 @@ def createHumanGeneAliasDict():
     return geneDict
 
 
-def readSleepGeneList():
-    sleep_gene_file = 'D:/Storage/Lab/sleep/sleep_gene/data/sleep_regulating_gene.xlsx'
-    sleepTable = pd.read_excel(sleep_gene_file,
-                               sheet_name='Full_SRGdata',
-                               usecols=['Gene', 'Tag', 'Tier', 'HGNC', 'mouse', 'Phenotype_curated', 'Model_for_genename'])
-    return sleepTable

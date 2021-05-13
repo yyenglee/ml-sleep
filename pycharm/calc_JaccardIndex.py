@@ -183,21 +183,16 @@ def process_input(geneSetList, geneList, geneDict, SRG_list, DATAPATH, curwkPATH
         return dataset
 
 ### actual code to insert JI score from database to the dataset
-def main(dataset, curwkPATH, geneSetList, SUFFIX, readlabelsFromInput, DATAPATH="./DATA/"):
+def main(dataset, curwkPATH, geneSetList, SUFFIX, DATAPATH):
     geneDict = SRGfn.createHumanGeneAliasDict()
 
     if not os.path.exists(curwkPATH + "Database_JI"):
         os.makedirs(curwkPATH + "Database_JI")
 
-    #dataset = pd.read_csv(curwkPATH + "fList_cleanRawValue_" + SUFFIX + ".csv")
     y = dataset.iloc[:, 1].values
     geneOrder = list(dataset["GeneSymbol"])
 
-    ## Set readsleepgenefrominput to False if need to label genes from files
-    if readlabelsFromInput:
-        inputGeneList = list(dataset["GeneSymbol"][y=='SRG'])
-    else:
-        inputGeneList = False
+    inputGeneList = list(dataset["GeneSymbol"][y=='SRG'])
 
     ## Create a dictionary to store gene list
     geneList = createGeneList(geneOrder)
