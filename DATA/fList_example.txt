@@ -1,0 +1,6 @@
+#Source	ID	Input	Models	DataType
+Hela_cellcycle	rhythmicity_hs_cellCycle	./DATA/genome_wide/Hela_cellcycleLSpval.txt	human	numeric
+CircadianRhythm	rhythmicity_mm_SCN	./DATA/genome_wide/SCN_mogene1_meta2dpval.txt	mouse	numeric
+E-MTAB-7805	E-MTAB-7805_hs_EBV.infection	./DATA/genome_wide/E-MTAB-7805_g8_g7_abslog2FC.txt	human	numeric
+GSE123878	GSE123878_exercise_mm_skeletal.muscle	./DATA/genome_wide/GSE123878_exercise_mm_muscle_abslog2FC.txt	mouse	numeric
+GSE114845	GSE114845_sleepDeprived_mm_cortex	./DATA/genome_wide/GSE114845_sleepDeprived_mm_cortex_abslog2FC.txt	mouse	numeric

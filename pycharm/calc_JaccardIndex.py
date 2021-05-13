@@ -1,3 +1,4 @@
+import argparse
 import pandas as pd
 import numpy as np
 import function as SRGfn
@@ -117,36 +118,9 @@ def createGeneList(geneOrder):
     return geneList
 
 
-def definegenelist(geneList, inputGeneList=False, remove_phenotype=[], remove_tier=[]):
-    if not inputGeneList:
-        sleepTable = SRGfn.readSleepGeneList()
-        new_SRG_list = []
-        for row in sleepTable.iterrows():
-            if not pd.isna(row[1]["HGNC"]):
-                if row[1]["Phenotype_curated"] not in remove_phenotype and row[1]["Tier"] not in remove_tier:
-                    try:
-                        geneList[row[1]["HGNC"]].markGene()
-                        new_SRG_list.append(row[1]["HGNC"])
-                    except KeyError:
-                        pass
-    else:
-        new_SRG_list = inputGeneList
-
-    for g in new_SRG_list:
-        try:
-            geneList[g].markGene()
-        except KeyError:
-            pass
-
-    new_SRG_list = list(set(new_SRG_list)) ## return only unique genes
-    print("No. of sleep genes: %s"%len(new_SRG_list))
-    print(new_SRG_list)
-    return new_SRG_list, geneList
-
-
 def process_database_gene(rName, fn, geneDict, geneList, SRG_list, DATAPATH, curwkPATH):
     inFileName = DATAPATH + fn
-    outFilePrefix = curwkPATH + "Database_JI/" + rName
+    outFilePrefix = curwkPATH + "term_JI/" + rName
     jaccard_index = calcJIforTerms(geneDict, geneList, SRG_list, inFileName)
     writeJIterms(jaccard_index, outFilePrefix)
     calcJIforGene(geneDict, geneList, jaccard_index, inFileName)
@@ -156,7 +130,7 @@ def process_database_gene(rName, fn, geneDict, geneList, SRG_list, DATAPATH, cur
 
 def process_database_term(rName, fn, geneDict, geneList, SRG_list, DATAPATH, curwkPATH):
     inFileName = DATAPATH + fn
-    outFilePrefix = curwkPATH + "Database_JI/" + rName
+    outFilePrefix = curwkPATH + "term_JI/" + rName
     jaccard_index = calcJIforTerms(geneDict, geneList, SRG_list, inFileName)
     writeJIterms(jaccard_index, outFilePrefix)
     convertJITermstoGene(geneDict, geneList, jaccard_index)
@@ -183,23 +157,39 @@ def process_input(geneSetList, geneList, geneDict, SRG_list, DATAPATH, curwkPATH
         return dataset
 
 ### actual code to insert JI score from database to the dataset
-def main(dataset, curwkPATH, geneSetList, SUFFIX, DATAPATH):
+def runJI(dataset, curwkPATH, geneSetList, SUFFIX, DATAPATH):
     geneDict = SRGfn.createHumanGeneAliasDict()
 
-    if not os.path.exists(curwkPATH + "Database_JI"):
-        os.makedirs(curwkPATH + "Database_JI")
+    if not os.path.exists(curwkPATH + "term_JI"):
+        os.makedirs(curwkPATH + "term_JI")
 
     y = dataset.iloc[:, 1].values
     geneOrder = list(dataset["GeneSymbol"])
 
-    inputGeneList = list(dataset["GeneSymbol"][y=='SRG'])
+    SRG_list = list(dataset["GeneSymbol"][y=='SRG'])
+    print(len(SRG_list), SRG_list)
 
     ## Create a dictionary to store gene list
     geneList = createGeneList(geneOrder)
-    SRG_list, geneList = definegenelist(geneList, inputGeneList=inputGeneList)
-    print(SRG_list)
     dataset = process_input(geneSetList=geneSetList, geneList=geneList, geneDict=geneDict, SRG_list=SRG_list, DATAPATH=DATAPATH, curwkPATH=curwkPATH, inserttodataframe=True, geneOrder=geneOrder, dataset=dataset)
 
     dataset.to_csv(curwkPATH + "fList_cleanRawValue_withJI_" + SUFFIX + ".csv", index=False)
 
     return dataset
+
+def main():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('-inTable', type=str, required=True, help="input table with at least 2 columns: genes and labels")
+    parser.add_argument('-wkdir', type=str, default="../OUT/")
+    parser.add_argument('-gmtList', default="../DATA/gmt_file/geneset.list")
+    parser.add_argument('-SUFFIX', type=str, default="")
+    parser.add_argument('-DATA_FOLDER', type=str, default="../DATA/")
+
+    args = parser.parse_args()
+
+    dataset = pd.read_csv(args.inTable)
+    runJI(dataset=dataset, curwkPATH=args.wkdir, geneSetList=args.gmtList, SUFFIX=args.SUFFIX, DATAPATH=args.DATA_FOLDER)
+
+if __name__ == "__main__":
+    main()

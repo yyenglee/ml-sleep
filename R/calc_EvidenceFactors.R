@@ -1,4 +1,4 @@
-## Script to calculate evidence factors given a list of data metrics
+## Script to calculate evidence factors given an input of row as gene and column as genomewide data metric
 
 library(ggplot2)
 library(ggridges)
@@ -18,11 +18,9 @@ curPath <- "./OUT/" # directory to write output file
 curDate <- '20210503' ## working date, use to create unique identity for output
 
 geneAliasDict <- list("mouse" = "./REFERENCE/Mus_musculus.gene_info.gz",
-                      "drosophila" = "./REFERENCE/Drosophila_melanogaster.gene_info.gz",
                       "human" = "./REFERENCE/Homo_sapiens.gene_info.gz")
 
 taxid <- list("mouse"= "10090", 
-              "drosophila" ="7227",
               "human"="9606")
     
 ## read gene used as labels    
@@ -31,31 +29,23 @@ inputsleepGene <- read.table("./DATA/inputSleepGeneList.txt", header=FALSE, sep=
 inputsleepGeneList <- inputsleepGene$GeneSymbol
 minInputSleepGeneCuttoff <- length(inputsleepGeneList)*.25
 
-## Read the list of gene for evaluation
-geneListBlank <- read.table("./DATA/GeneList.txt",sep="\t", quote="", header=T)
-geneListBlank <- labelData(geneListBlank, sleepGeneList = inputsleepGeneList)
+## read existing table with data metrics raw value
+rawValuetable <- read.csv(paste0("./OUT/fList_rawValuetable.csv"), header=T) %>%
+  dplyr::select(-label)
+rawValuetable <- labelData(rawValuetable, sleepGeneList=inputsleepGeneList)
 
 ## Create empty data based on the set of all known gene
-rawValuetable <- geneListBlank
+geneListBlank <- read.table("./DATA/GeneList.txt",sep="\t", quote="", header=T)
+geneListBlank <- labelData(geneListBlank, sleepGeneList = inputsleepGeneList)
 EFtable <- geneListBlank
 
 ## Calculate evidence factor for each data metrics
-PATH <- read.table("combine_fList_updateGeneList.txt",header=F) %>%
+PATH <- read.table("./DATA/fList_example.txt",header=F) %>%
   magrittr::set_colnames(c("Source", "ID","Input","Models","DataType")) %>%
   dplyr::mutate(rID=gsub("-",".",ID)) %>%
   dplyr::select(-ID) %>%
   dplyr::rename("ID"="rID") %>%
-  #dplyr::mutate(maxEF=NA, upper99.EF=NA)
   dplyr::mutate(EFscore=NA)
-
-## read existing table with data metrics raw value
-rawValuetable <- read.csv(paste0("./fList_rawValuetable.csv"), header=T) %>%
-  dplyr::select(-label)
-rawValuetable <- labelData(rawValuetable, sleepGeneList=inputsleepGeneList)
-
-## Add new data metrics to rawValuetable
-rawValuetable <- addRawValue(PATH, rawValuetable, inputsleepGeneList)
-write.csv(rawValuetable, "./fList_rawValuetable.csv", row.names=FALSE)
 
 pdf(paste0(curPath,"EFbin_",curDate,".pdf"),8,3)
 p <- list()
@@ -117,6 +107,7 @@ yy <- zz %>%
   dplyr::filter(maxEF>=3)
 head(yy, 20)
 
+# plot distribution of maximum evidence factors for all tested data metrics
 p1 <- ggplot(zz, aes(x=maxEF)) + 
   geom_histogram(bins=500, fill="darkblue", alpha=0.8) +
   #geom_density() +
@@ -127,15 +118,15 @@ p1 <- ggplot(zz, aes(x=maxEF)) +
 ggsave(p1, filename = paste0(curPath,"EF_distribution",curDate,".pdf"),width = 2.5, height = 2)
 
 cleanRawValuetable <- rawValuetable %>%
-  dplyr::select(c("GeneSymbol","label",c(names(yy)))) %>%
+  dplyr::select(c("GeneSymbol","label",yy$ID)) %>%
   dplyr::mutate(naCount = apply(.[-c(1,2)],1,function(x){sum(is.na(x))})) %>%
-  dplyr::filter(naCount<length(yy)* .5) %>%
+  dplyr::filter(naCount<nrow(yy)* .5) %>%
   dplyr::select(-naCount)
 
 cleanEFtable <- EFtable %>%
-  dplyr::select(c("GeneSymbol","label",names(yy))) %>%
+  dplyr::select(c("GeneSymbol","label",yy$ID)) %>%
   dplyr::mutate(naCount = apply(.[-c(1,2)],1,function(x){sum(is.na(x))})) %>%
-  dplyr::filter(naCount<length(yy)* .5) %>%
+  dplyr::filter(naCount<nrow(yy)* .5) %>%
   dplyr::select(-naCount)
 
 ## calculate pairwise correlation for selected samples wiht high evidence factors
@@ -149,19 +140,18 @@ vv <- melt(corTable, id.vars = "ID") %>%
   dplyr::mutate(sp1=dataName[.$ID], sp2=dataName[.$variable])
 
 cleanRawValuetable <- rawValuetable %>%
-  dplyr::select(c("GeneSymbol","label",c(names(yy)))) %>%
+  dplyr::select(c("GeneSymbol","label",yy$ID)) %>%
   dplyr::mutate(naCount = apply(.[-c(1,2)],1,function(x){sum(is.na(x))})) %>%
-  dplyr::filter(naCount<length(yy)* .5) %>%
+  dplyr::filter(naCount<nrow(yy)* .5) %>%
   dplyr::select(-vv$sp2) %>%
   dplyr::select(-naCount)
 
 cleanEFtable <- EFtable %>%
-  dplyr::select(c("GeneSymbol","label",names(yy))) %>%
+  dplyr::select(c("GeneSymbol","label",yy$ID)) %>%
   #dplyr::select(-(vv$sp2[vv$sp2%in%names(yy)])) %>%
   dplyr::mutate(naCount = apply(.[-c(1,2)],1,function(x){sum(is.na(x))})) %>%
-  dplyr::filter(naCount<length(yy)* .5) %>%
+  dplyr::filter(naCount<nrow(yy)* .5) %>%
   dplyr::select(-vv$sp2) %>%
   dplyr::select(-naCount)
 
-write.csv(cleanRawValuetable, paste0("fList_cleanRawValue_",curDate,".csv"), row.names=FALSE)
-write.csv(cleanEFtable, paste0("fList_cleanEFtable_",curDate,".csv"), row.names=FALSE)
+write.csv(cleanRawValuetable, paste0(curPath, "fList_cleanRawValue_",curDate,".csv"), row.names=FALSE)

@@ -8,18 +8,18 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import StratifiedShuffleSplit
 from sklearn.ensemble import RandomForestClassifier
 
-PATH = "~/OUT/"
-DATE = "20210512"
-INPUT_TABLE = "./DATA/fList_cleanRawValue_20201229.csv"
-runJI = False    ## Do you want to add in features from jaccard index?
+PATH = "../OUT/"
+DATE = "20210503"
+INPUT_TABLE = "../OUT/fList_cleanRawValue_" + DATE + ".csv"
+runJI = True    ## Do you want to add in features from jaccard index in this script?
 
 if runJI == True:
     inData = pd.read_csv(INPUT_TABLE)
-    dataset = calcJI.main(dataset = inData,
+    dataset = calcJI.runJI(dataset = inData,
                           curwkPATH = PATH,
-                          geneSetList = "./DATA/gmt_file/geneset.list",
+                          geneSetList = "../DATA/gmt_file/geneset.list",
                           SUFFIX = DATE,
-                          DATAPATH="./DATA/")
+                          DATAPATH="../DATA/")
 else:
     dataset = pd.read_csv(INPUT_TABLE)
 
@@ -39,7 +39,6 @@ labelencoder_y = LabelEncoder()
 y = labelencoder_y.fit_transform(y)
 y_rename = abs(1-y)  # label sleep gene as 1 and non sleep gene as 0
 
-
 ## Create correlation table between sleep genes
 testRatio = [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]
 sleepGeneList = list(dataset["GeneSymbol"][y==0])
@@ -47,7 +46,7 @@ weight = (10000/labeldata[labeldata["label"] == "SRG"].shape[0])
 all_indices = list(range(X.shape[0]))
 feature_list = dataset.columns[2:]
 seed_value = 18
-nStep = 100
+nStep = 10
 SUFFIX = "n" + str(nStep) + "_" + DATE + "_"
 
 featureDict = {}
@@ -116,7 +115,6 @@ for i in range(len(testRatio)):
 
 wf = open(PATH + "feature_importance_" + DATE + ".txt", "w")
 for f in featureDict.keys():
-    #wf.write('%s\n' % f)
     for j in featureDict[f].keys():
         wf.write('%s\t%s\t'%(f,j))
         for k in featureDict[f][j]:

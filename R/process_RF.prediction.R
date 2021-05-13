@@ -1,9 +1,19 @@
+library(ggplot2)
+library(dplyr)
+library(reshape)
+library(magrittr)
+library(data.table)
+library(magrittr)
+
 ## script to process random forest prediction
 ## summarize gene prediction
 
 curPath <- "./OUT/"
-prefix <- "n100_20210401"
-class1cutoff <- 0.413
+prefix <- "n10_20210503"
+class1cutoff <- 0.5
+
+inputsleepGene <- read.table("./DATA/inputSleepGeneList.txt", header=FALSE, sep="\t") %>%
+  magrittr::set_colnames(c("GeneSymbol", "Tier"))
 
 ratio <- c(0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8)
 combineGeneScore <- data.frame(GeneSymbol=character(),
@@ -26,7 +36,6 @@ for(r in ratio){
     RFcount <- RFtable %>%
       dplyr::select(c(1,2,3,i+3)) %>%
       inner_join(test_gene, by="GeneSymbol")
-    #geneScoreTable$RFsum <- geneScoreTable$RFsum + apply(RFcount, 1, function(x){ifelse(x[7]==1,ifelse(x[4]==1,1,0),0)})
     geneScoreTable$RFsum <- geneScoreTable$RFsum + apply(RFcount, 1, function(x){as.numeric(ifelse(x[7]==1,ifelse(x[4]>=0.1, x[4], 0),0))})
   }
   
@@ -43,7 +52,6 @@ summarizeGeneScore <- combineGeneScore %>%
   dplyr::filter(RFsumF>0.1) %>%
   group_by(GeneSymbol, label) %>%
   dplyr::summarise(rawScore=mean(RFsumF), RFscore=max(ratio*10)+mean(RFsumF)) %>%
-  #dplyr::summarise(rawScore=mean(RFsumF), RFscore=n(RFsumF[RFsumF>0.1]) + mean(RFsumF)) %>%
   ungroup() %>%
   dplyr::arrange(-RFscore) %>%
   dplyr::mutate(RFrank=as.numeric(rownames(.))) %>%
@@ -64,7 +72,7 @@ geneScore <- combineGeneScore %>%
   
 tt <- table(summarizeGeneScore$label, summarizeGeneScore$class)
 classsize <- cumsum(tt[1,]+tt[2,])
-p2 <- ggplot(geneScore, mapping=aes(x=RFsumF, y=factor(GeneSymbol))) +
+p1 <- ggplot(geneScore, mapping=aes(x=RFsumF, y=factor(GeneSymbol))) +
   geom_point(color="grey", size=0.25, alpha=0.8, shape=16) +
   stat_summary(fun="mean", geom="point", aes(color=sublabel, shape=sublabel), alpha=0.9, size=1) +
   stat_summary(subset(geneScore,geneScore$label=="SRG"&GeneSymbol %in% inputsleepGene[inputsleepGene$Tier==1,"GeneSymbol"]), 
@@ -82,4 +90,4 @@ p2 <- ggplot(geneScore, mapping=aes(x=RFsumF, y=factor(GeneSymbol))) +
   xlab("Prediction score") +
   theme_classic() +
   theme(axis.text.y = element_text(size=10))
-ggsave(paste0(curPath,"prediction_score_",curDate,".pdf"), p2, width=4, height=3.5, useDingbats = FALSE)
+ggsave(paste0(curPath,"prediction_score.pdf"), p1, width=4, height=3.5, useDingbats = FALSE)

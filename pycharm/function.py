@@ -16,7 +16,7 @@ class Gene:
 
 # Create dictionary to map all gene alias to official gene name
 def createHumanGeneAliasDict():
-    humanREF = './REFERENCE/Homo_sapiens.gene_info.gz'
+    humanREF = '../REFERENCE/Homo_sapiens.gene_info.gz'
     geneDict = {}
     with gzip.open(humanREF, "rb") as f:
         next(f)
