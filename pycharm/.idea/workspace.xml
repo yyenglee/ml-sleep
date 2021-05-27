@@ -5,15 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b8b26e1f-0ad9-4983-948f-f0aef012b849" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../DATA/GWAS_mapped_gene.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../DATA/gmt_file/geneset.list" beforeDir="false" afterPath="$PROJECT_DIR$/../DATA/gmt_file/geneset.list" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../R/calc_EvidenceFactors.R" beforeDir="false" afterPath="$PROJECT_DIR$/../R/calc_EvidenceFactors.R" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/pycharm.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/pycharm.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../.Rhistory" beforeDir="false" afterPath="$PROJECT_DIR$/../.Rhistory" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/RF_prediction.py" beforeDir="false" afterPath="$PROJECT_DIR$/RF_prediction.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/calc_JaccardIndex.py" beforeDir="false" afterPath="$PROJECT_DIR$/calc_JaccardIndex.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/function.py" beforeDir="false" afterPath="$PROJECT_DIR$/function.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -95,7 +89,9 @@
       <workItem from="1620857897434" duration="1365000" />
       <workItem from="1620859618131" duration="627000" />
       <workItem from="1620874905022" duration="242000" />
-      <workItem from="1620875171912" duration="4233000" />
+      <workItem from="1620875171912" duration="6320000" />
+      <workItem from="1621973508440" duration="5629000" />
+      <workItem from="1622090378872" duration="623000" />
     </task>
     <servers />
   </component>
