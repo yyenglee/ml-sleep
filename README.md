@@ -13,7 +13,7 @@ Script used to build machine learning model to predict sleep genes. Features are
             This pipeline includes - <br />
             1. Calculate evidence factors based on the seed genes for each datasets in the genome-wide table. Select those that can provide information (maxEF>3). <br />
             2. Additional features based on gene sets annotation information and Jaccard index. <br />
-            3. To decide if going to run the <br />
+            3. Three analysis could be run with this script <br />
                 -  model evaluation with seed genes, <br />
                 -  model evaluation with randomly assign labels, <br />
                 -  predictions using random forest models. <br />
