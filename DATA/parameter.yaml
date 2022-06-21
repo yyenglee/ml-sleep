@@ -1,0 +1,25 @@
+# parameters for calculating evidence factors (calcEF)
+calcEF_writeEFtable : False     ## boolean:True/False, whether write gene-level EF table as output , output EF file is huge, >1GB
+calcEF_EqualBins : True         ## boolean:True/False, whether to create equal bin markers from the range of measurements
+calcEF_fixEqualbinSize : 100    ## int: if EqualBins=True, set the number of expected bin size
+calcEF_QuantileBins : True      ## boolean:True/False, whether to create bin markers based on quantile level
+calcEF_fixQuantilebinSize : 10  ## int: if QuantileBins=True, set the number of expected bin size
+calcEF_lowpctcutoff : 0.01      ## float: percentage of genes for cutoff - for group with smaller proportions of genes
+calcEF_highpctcutoff : 0.1      ## float: percentage of genes for cutoff - for group with larger proportions of genes
+calcEF_minSGcount : 2           ## int: minimum number of seed genes in a bin, will override the lowpctcutoff
+
+## parameters for RF prediction
+RFpred_predRatioStep : [0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8]   ## list: proportion of samples used to train the prediction models
+RFpred_iter_n : 100                                ## int: number of iterations
+RFpred_seed_value : 42                             ## int: seed values for sample split and RF model
+RFpred_dynamicRFmaxLeafNodes : False                ## boolean:True/False, if True, the RF_max_leaf_nodes will be dynamic values based on total number of labels in the training set
+RFpred_RFmaxLeaftoLabelsRatio : 3                  ## int: set if dynamicRFmaxLeafNodes=True, division to the total number of labels used for training set
+RFpred_RF_max_leaf_nodes : 12                      ## int: if dynamicRFmaxLeafNodes=False, this number will be the maximum leaf nodes for each model
+RFpred_bgnoisethreshold : 0.1                      ## float: predicted probability less than this value will be filtered (background noise)
+RFpred_highCthreshold : 0.5                        ## float: prediction with average score higher than this will set as high confidence
+
+## other parameter
+maxEFcutoff : 3                 ## int: cut off for maximum evidence factors, features with larger than this value will be selected to train prediction models
+propCutOffForGeneswithNA : 0.9  ## float: genes(samples) with missing value more than this proportion * number of selected features will be filtered
+corCutOffForFeatures : 0.8      ## float: if two features with correlation coefficient larger than this value, feature with lower maximum evidence factors will be filtered
+
