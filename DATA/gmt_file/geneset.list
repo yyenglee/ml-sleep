@@ -1,1 +1,4 @@
-MSigDB_c2.canonicalPathway	gmt_file/c2.cp.v7.1.symbols.gmt	geneJI
+Hmnz_KEA_kinaseEnrichment	DATA/gmt_file/KEA_gene_set_library_crisp.gmt	geneJI
+BIOGRID_proteinInteractions	DATA/gmt_file/ppi_biogrid_terms.gmt	termJI
+MSigDB_c2.chemicalandGeneticPerturbation	DATA/gmt_file/c2.cgp.v7.1.symbols.gmt	geneJI
+MSigDB_c3.transcriptionFactorTargets	DATA/gmt_file/c3.tft.v7.1.symbols.gmt	geneJI
